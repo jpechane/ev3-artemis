@@ -58,11 +58,8 @@ public class Controller {
 		distance.setText("Unknown");
 		distance.setPreferredSize(new Dimension(300, 100));
 
-		broker.listenForMessages(null, payload -> SwingUtilities
-				.invokeLater(() -> setDistance(payload)),
-				payload -> SwingUtilities
-						.invokeLater(() -> setWindowTitle(RobotState
-								.valueOf(payload))));
+		broker.listenForMessages(null, payload -> SwingUtilities.invokeLater(() -> setDistance(payload)),
+				payload -> SwingUtilities.invokeLater(() -> setWindowTitle(RobotState.valueOf(payload))));
 	}
 
 	private void setWindowTitle(RobotState state) {

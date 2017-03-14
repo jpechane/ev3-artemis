@@ -22,11 +22,10 @@ public class Robot {
 	private final EV3IRSensor irSensor;
 	private final SampleProvider irData;
 	boolean advertisedRobotState = false;
-	
+
 	public Robot() {
 		ev3 = (EV3) BrickFinder.getDefault();
-		pilot = new DifferentialPilot(WHEEL_DIAMETER, TRACK_WIDTH,
-				new EV3LargeRegulatedMotor(ev3.getPort("A")),
+		pilot = new DifferentialPilot(WHEEL_DIAMETER, TRACK_WIDTH, new EV3LargeRegulatedMotor(ev3.getPort("A")),
 				new EV3LargeRegulatedMotor(ev3.getPort("C")));
 		irSensor = new EV3IRSensor(ev3.getPort("S4"));
 		irData = irSensor.getDistanceMode();
@@ -47,7 +46,7 @@ public class Robot {
 				averageDistance /= distances.length;
 				broker.sendObstacleDistance((int) averageDistance);
 				if (pilot.isMoving()) {
-					
+
 				}
 				try {
 					Thread.sleep(100);
@@ -67,7 +66,7 @@ public class Robot {
 			advertisedRobotState = isMoving;
 		}
 	}
-	
+
 	private void executeComand(String command) {
 		if (Command.STOP.name().equals(command)) {
 			pilot.stop();
@@ -84,8 +83,7 @@ public class Robot {
 		Robot robot = new Robot();
 		if (args.length != 0) {
 			robot.run(args[0]);
-		}
-		else {
+		} else {
 			robot.run("10.0.1.11");
 		}
 	}
