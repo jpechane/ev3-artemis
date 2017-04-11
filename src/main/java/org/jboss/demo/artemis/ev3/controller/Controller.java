@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -114,9 +115,13 @@ public class Controller {
 		quit = new JButton("Quit");
 		quit.setPreferredSize(new Dimension(120, 40));
 		handPane.add(quit);
-		quit.addActionListener(e -> {
+		quit.addActionListener(event -> {
 			broker.sendCommand(Command.QUIT);
 			window.dispose();
+			try {
+				broker.close();
+			} catch (final IOException e) {
+			}
 			System.exit(0);
 		});
 

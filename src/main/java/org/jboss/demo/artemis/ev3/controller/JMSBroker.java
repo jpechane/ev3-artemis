@@ -116,22 +116,16 @@ public class JMSBroker implements Broker {
 
 	public void close() throws IOException {
 		try {
-			if (connection != null) {
-				connection.stop();
-			}
-		} catch (JMSException e) {
+			session.close();
+		} catch (final Exception e) {
 		}
 		try {
-			if (session != null) {
-				session.close();
-			}
-		} catch (JMSException e) {
+			connection.stop();
+		} catch (final Exception e) {
 		}
 		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (JMSException e) {
+			connection.close();
+		} catch (final Exception e) {
 		}
 	}
 }
