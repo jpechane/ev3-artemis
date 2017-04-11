@@ -6,10 +6,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.jboss.demo.artemis.ev3.Broker;
@@ -19,7 +22,7 @@ import org.jboss.demo.artemis.ev3.RobotState;
 public class Controller {
 
 	private static final String ROLE_CONTROLLER = "controller";
-	private static final String TITLE_PREFIX = "EV3 Controller: ";
+	private static final String TITLE = "EV3 Controller";
 	private final JFrame window;
 	private final JButton forward;
 	private final JButton backward;
@@ -29,23 +32,40 @@ public class Controller {
 	private final JButton grab;
 	private final JButton release;
 	private final JButton quit;
-	private final JTextField distance;
+	private final JLabel distance;
+	private final JLabel state;
 	private final Broker broker;
 
 	private Controller() {
 		broker = new JMSBroker("localhost", ROLE_CONTROLLER);
 
 		window = new JFrame();
-		setWindowTitle(RobotState.UNKNOWN);
+		window.setTitle(TITLE);
 		window.setSize(800, 600);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		final Container mainPane = window.getContentPane();
 		final Container movementPane = new JPanel();
 		movementPane.setLayout(new BorderLayout());
+
 		final Container handPane = new JPanel();
 		handPane.setLayout(new FlowLayout());
+
+		final JPanel distancePane = new JPanel();
+		distancePane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Distance"),
+				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+		final JPanel statePane = new JPanel();
+		statePane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Robot State"),
+				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+		final Container infoPane = new JPanel();
+		infoPane.setLayout(new BoxLayout(infoPane, BoxLayout.Y_AXIS));
+		infoPane.add(distancePane);
+		infoPane.add(statePane);
+
 		mainPane.add(movementPane, BorderLayout.WEST);
 		mainPane.add(handPane, BorderLayout.SOUTH);
+		mainPane.add(infoPane, BorderLayout.EAST);
 
 		forward = new JButton("Forward");
 		forward.setPreferredSize(new Dimension(200, 100));
@@ -72,9 +92,14 @@ public class Controller {
 		movementPane.add(right, BorderLayout.EAST);
 		right.addActionListener(e -> broker.sendCommand(Command.RIGHT));
 
-		distance = new JTextField();
-		mainPane.add(distance, BorderLayout.EAST);
-		Font font = new Font("Courier", Font.BOLD, 16);
+		distance = new JLabel();
+		distance.setHorizontalAlignment(SwingConstants.CENTER);
+		distancePane.add(distance);
+		Font font = new Font("Courier", Font.BOLD, 26);
+
+		state = new JLabel();
+		state.setHorizontalAlignment(SwingConstants.CENTER);
+		statePane.add(state);
 
 		grab = new JButton("Grab");
 		grab.setPreferredSize(new Dimension(120, 40));
@@ -92,18 +117,23 @@ public class Controller {
 		quit.addActionListener(e -> {
 			broker.sendCommand(Command.QUIT);
 			window.dispose();
+			System.exit(0);
 		});
 
 		distance.setFont(font);
 		distance.setText("Unknown");
 		distance.setPreferredSize(new Dimension(300, 100));
 
+		state.setFont(font);
+		state.setText(RobotState.UNKNOWN.toString());
+		state.setPreferredSize(new Dimension(300, 100));
+
 		broker.listenForMessages(null, payload -> SwingUtilities.invokeLater(() -> setDistance(payload)),
-				payload -> SwingUtilities.invokeLater(() -> setWindowTitle(RobotState.valueOf(payload))));
+				payload -> SwingUtilities.invokeLater(() -> setRobotState(RobotState.valueOf(payload))));
 	}
 
-	private void setWindowTitle(final RobotState state) {
-		window.setTitle(TITLE_PREFIX + state.name());
+	private void setRobotState(final RobotState state) {
+		this.state.setText(state.toString());
 	}
 
 	private void setDistance(final String distance) {
